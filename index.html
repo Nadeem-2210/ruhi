@@ -6,6 +6,8 @@
     <title>Nadeem & Sister's Travel Diary | Udaipur & Ahmedabad</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -25,9 +27,7 @@
         }
     </script>
     <style>
-        body {
-            font-family: 'Times New Roman', Times, serif;
-        }
+        body { font-family: 'Times New Roman', Times, serif; }
     </style>
 </head>
 <body class="bg-sand text-gray-800 min-h-screen flex flex-col selection:bg-goldAccent selection:text-white">
@@ -44,7 +44,7 @@
         </div>
     </nav>
 
-    <!-- Hero Section: Udaipur & Ahmedabad Vibe -->
+    <!-- Hero Section -->
     <header class="relative bg-gradient-to-r from-royalBlue to-terracotta text-white py-24 px-6 text-center">
         <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
         <div class="relative max-w-4xl mx-auto space-y-6">
@@ -77,9 +77,8 @@
 
         <!-- Dynamic Photo & Video Grid -->
         <section id="gallery" class="space-y-6">
-            <div id="media-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Dynamically populated cards will appear here -->
-            </div>
+            <div id="loading-state" class="text-center py-12 text-gray-500 text-xl font-serif">Loading live memories from Supabase...</div>
+            <div id="media-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             
             <!-- Empty State -->
             <div id="empty-state" class="hidden text-center py-20 bg-white rounded-lg border border-dashed border-gray-300">
@@ -93,9 +92,7 @@
     <!-- Lightbox Modal -->
     <div id="lightbox" class="fixed inset-0 z-50 bg-black/90 hidden flex items-center justify-center p-4">
         <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-3xl hover:text-amber-300">&times;</button>
-        <div id="lightbox-content" class="max-w-4xl max-h-[90vh] flex items-center justify-center">
-            <!-- Content injected via JS -->
-        </div>
+        <div id="lightbox-content" class="max-w-4xl max-h-[90vh] flex items-center justify-center"></div>
     </div>
 
     <!-- Footer -->
@@ -103,73 +100,51 @@
         <div class="max-w-4xl mx-auto space-y-3">
             <p class="text-xl font-serif">Nadeem & Sister's Travel Diary</p>
             <p class="text-sm text-amber-200/80">Crafted with elegance for Udaipur & Ahmedabad adventures.</p>
-            <p class="text-xs text-gray-400 pt-4">&copy; 2026 Travel Diary. Deployed on Vercel.</p>
+            <p class="text-xs text-gray-400 pt-4">&copy; 2026 Travel Diary. Powered by Supabase & Vercel.</p>
         </div>
     </footer>
 
-    <!-- Frontend Script for Dynamic Loading & Filtering -->
+    <!-- Supabase Frontend Script -->
     <script>
-        // Default seed data capturing Udaipur & Ahmedabad vibe if none exist in LocalStorage
-        const defaultMemories = [
-            {
-                id: 1,
-                title: "Sunset at Lake Pichola",
-                location: "Udaipur",
-                type: "image",
-                url: "https://images.unsplash.com/photo-1615836245347-f54b2fc1346a?auto=format&fit=crop&w=800&q=80",
-                description: "Golden hour reflection on the tranquil waters of Lake Pichola.",
-                date: "2026-03-15"
-            },
-            {
-                id: 2,
-                title: "Historic Pols of Ahmedabad",
-                location: "Ahmedabad",
-                type: "image",
-                url: "https://images.unsplash.com/photo-1599661046289-e31898f46a41?auto=format&fit=crop&w=800&q=80",
-                description: "Exploring the intricate wooden architecture and heritage lanes.",
-                date: "2026-04-10"
-            },
-            {
-                id: 3,
-                title: "Saheliyon-ki-Bari Fountains",
-                location: "Udaipur",
-                type: "image",
-                url: "https://images.unsplash.com/photo-1589182337358-2cb6a099450d?auto=format&fit=crop&w=800&q=80",
-                description: "Strolling through the lush green gardens and marble kiosks.",
-                date: "2026-05-02"
-            },
-            {
-                id: 4,
-                title: "Sabarmati Riverfront Evening",
-                location: "Ahmedabad",
-                type: "image",
-                url: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=800&q=80",
-                description: "Breezy walks along the vibrant riverfront promenade.",
-                date: "2026-05-20"
-            }
-        ];
+        // PARE YOUR SUPABASE CREDENTIALS HERE
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
-        function getMemories() {
-            const stored = localStorage.getItem('travel_memories');
-            if (!stored) {
-                localStorage.setItem('travel_memories', JSON.stringify(defaultMemories));
-                return defaultMemories;
-            }
-            return JSON.parse(stored);
-        }
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        let allMemories = [];
         let currentFilter = 'all';
 
+        async function fetchMemories() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('memories')
+                    .select('*')
+                    .order('date', { ascending: false });
+
+                document.getElementById('loading-state').style.display = 'none';
+
+                if (error) {
+                    console.error('Error fetching memories:', error);
+                    return;
+                }
+                allMemories = data || [];
+                renderMemories(currentFilter);
+            } catch (err) {
+                console.error('Unexpected error:', err);
+                document.getElementById('loading-state').innerText = 'Failed to connect to Supabase database.';
+            }
+        }
+
         function renderMemories(filter = 'all') {
-            const memories = getMemories();
             const grid = document.getElementById('media-grid');
             const emptyState = document.getElementById('empty-state');
-            
             grid.innerHTML = '';
             
             const filtered = filter === 'all' 
-                ? memories 
-                : memories.filter(m => m.location.toLowerCase() === filter.toLowerCase());
+                ? allMemories 
+                : allMemories.filter(m => m.location.toLowerCase() === filter.toLowerCase());
 
             if (filtered.length === 0) {
                 emptyState.classList.remove('hidden');
@@ -178,21 +153,11 @@
                 emptyState.classList.add('hidden');
             }
 
-            filtered.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(mem => {
+            filtered.forEach(mem => {
                 const card = document.createElement('div');
                 card.className = "bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition border border-amber-900/10 flex flex-col";
                 
-                let mediaElement = '';
-                if (mem.type === 'video' || mem.url.includes('youtube.com') || mem.url.includes('youtu.be') || mem.url.endsWith('.mp4')) {
-                    if (mem.url.includes('youtube.com') || mem.url.includes('youtu.be')) {
-                        // Handle simple YouTube embed or fallback
-                        mediaElement = `<div class="aspect-video w-full bg-black flex items-center justify-center text-white"><span class="text-sm">Video Memory</span></div>`;
-                    } else {
-                        mediaElement = `<video src="${mem.url}" class="w-full h-64 object-cover cursor-pointer" onclick="openVideoModal('${mem.url}')" controls></video>`;
-                    }
-                } else {
-                    mediaElement = `<img src="${mem.url}" alt="${mem.title}" class="w-full h-64 object-cover cursor-pointer hover:scale-105 transition duration-300" onclick="openImageModal('${mem.url}', '${mem.title}')">`;
-                }
+                let mediaElement = `<img src="${mem.url}" alt="${mem.title}" class="w-full h-64 object-cover cursor-pointer hover:scale-105 transition duration-300" onclick="openImageModal('${mem.url}', '${mem.title}')">`;
 
                 card.innerHTML = `
                     <div class="relative overflow-hidden">
@@ -234,9 +199,8 @@
             document.getElementById('lightbox').classList.add('hidden');
         }
 
-        // Initial load
         window.addEventListener('DOMContentLoaded', () => {
-            renderMemories('all');
+            fetchMemories();
         });
     </script>
 </body>

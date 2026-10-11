@@ -6,6 +6,8 @@
     <title>Admin Portal | Travel Diary</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -25,9 +27,7 @@
         }
     </script>
     <style>
-        body {
-            font-family: 'Times New Roman', Times, serif;
-        }
+        body { font-family: 'Times New Roman', Times, serif; }
     </style>
 </head>
 <body class="bg-sand text-gray-800 min-h-screen flex flex-col">
@@ -61,32 +61,32 @@
                     Login to Dashboard
                 </button>
             </form>
-            <p class="text-xs text-center text-gray-400">Default PIN is set to <code class="bg-gray-100 px-1 py-0.5 rounded font-mono">2210</code> (changeable in code).</p>
+            <p class="text-xs text-center text-gray-400">Default PIN is set to <code class="bg-gray-100 px-1 py-0.5 rounded font-mono">2210</code>.</p>
         </div>
 
-        <!-- Dashboard Section (Hidden until logged in) -->
+        <!-- Dashboard Section -->
         <div id="dashboard-section" class="hidden space-y-10">
             
             <div class="flex justify-between items-center border-b border-gray-300 pb-4">
                 <div>
-                    <h1 class="text-3xl font-serif font-bold text-royalBlue">Memory Management</h1>
-                    <p class="text-gray-600 text-base">Upload new moments or manage existing records.</p>
+                    <h1 class="text-3xl font-serif font-bold text-royalBlue">Cloud Memory Management</h1>
+                    <p class="text-gray-600 text-base">Uploads sync instantly to your live website.</p>
                 </div>
                 <button onclick="handleLogout()" class="text-terracotta hover:underline font-semibold text-lg">Logout</button>
             </div>
 
             <!-- Upload Form -->
             <div class="bg-white p-8 rounded-lg shadow-md border border-amber-900/10 space-y-6">
-                <h2 class="text-2xl font-serif font-bold text-terracotta">Add New Photo / Video Memory</h2>
+                <h2 class="text-2xl font-serif font-bold text-terracotta">Add New Photo Memory</h2>
                 <form onsubmit="handleAddMemory(event)" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-lg font-medium text-gray-700 mb-1">Memory Title</label>
-                        <input type="text" id="mem-title" placeholder="e.g., Boat Ride at Fateh Sagar" required
+                        <input type="text" id="mem-title" placeholder="e.g., Sunset at Lake Pichola" required
                             class="w-full px-4 py-2.5 border border-gray-300 rounded focus:ring-2 focus:ring-royalBase text-lg">
                     </div>
                     <div>
                         <label class="block text-lg font-medium text-gray-700 mb-1">Location</label>
-                        <select id="mem-location" class="w-full px-4 py-2.5 border border-gray-300 rounded focus:ring-2 focus:ring-royalBase text-lg bg-white">
+                        <select id="mem-location" class="w-full px-4 py-2.5 border border-gray-300 rounded focus:ring-2 text-lg bg-white">
                             <option value="Udaipur">Udaipur</option>
                             <option value="Ahmedabad">Ahmedabad</option>
                             <option value="Other">Other Location</option>
@@ -94,40 +94,38 @@
                     </div>
                     <div>
                         <label class="block text-lg font-medium text-gray-700 mb-1">Media Type</label>
-                        <select id="mem-type" class="w-full px-4 py-2.5 border border-gray-300 rounded focus:ring-2 focus:ring-royalBase text-lg bg-white">
+                        <select id="mem-type" class="w-full px-4 py-2.5 border border-gray-300 rounded focus:ring-2 text-lg bg-white">
                             <option value="image">Image URL</option>
-                            <option value="video">Video URL / MP4</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-lg font-medium text-gray-700 mb-1">Date</label>
                         <input type="date" id="mem-date" required
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded focus:ring-2 focus:ring-royalBase text-lg">
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded focus:ring-2 text-lg">
                     </div>
                     <div class="md:col-span-2">
-                        <label class="block text-lg font-medium text-gray-700 mb-1">Media Direct URL (Image/Video link)</label>
-                        <input type="url" id="mem-url" placeholder="https://images.unsplash.com/... or image link" required
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded focus:ring-2 focus:ring-royalBase text-lg">
-                        <p class="text-xs text-gray-500 mt-1">Tip: You can paste any direct image/video URL from Unsplash, Imgur, or your cloud storage.</p>
+                        <label class="block text-lg font-medium text-gray-700 mb-1">Direct Image URL</label>
+                        <input type="url" id="mem-url" placeholder="https://images.unsplash.com/..." required
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded focus:ring-2 text-lg">
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-lg font-medium text-gray-700 mb-1">Description</label>
                         <textarea id="mem-desc" rows="3" placeholder="Share a short note about this memory..." required
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded focus:ring-2 focus:ring-royalBase text-lg"></textarea>
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded focus:ring-2 text-lg"></textarea>
                     </div>
                     <div class="md:col-span-2">
-                        <button type="submit" class="w-full bg-terracotta text-white py-3 rounded text-lg font-semibold hover:bg-terracotta/90 transition shadow">
-                            Publish Memory to Gallery
+                        <button type="submit" id="submit-btn" class="w-full bg-terracotta text-white py-3 rounded text-lg font-semibold hover:bg-terracotta/90 transition shadow">
+                            Publish to Cloud
                         </button>
                     </div>
                 </form>
             </div>
 
-            <!-- Existing Memories List for Management -->
+            <!-- Existing Memories List -->
             <div class="bg-white p-8 rounded-lg shadow-md border border-amber-900/10 space-y-6">
-                <h2 class="text-2xl font-serif font-bold text-royalBlue">Manage Existing Memories</h2>
+                <h2 class="text-2xl font-serif font-bold text-royalBlue">Manage Cloud Records</h2>
                 <div id="admin-memories-list" class="space-y-4 divide-y divide-gray-200">
-                    <!-- Populated via JS -->
+                    <p class="text-gray-500 py-4 text-lg">Loading records...</p>
                 </div>
             </div>
 
@@ -135,9 +133,16 @@
 
     </main>
 
-    <!-- Admin Logic Script -->
+    <!-- Admin Supabase Logic Script -->
     <script>
-        const ADMIN_PIN = "2210"; // You can change your PIN here
+        // PASTE YOUR SUPABASE CREDENTIALS HERE
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const ADMIN_PIN = "2210";
 
         function handleLogin(e) {
             e.preventDefault();
@@ -160,65 +165,29 @@
         function showDashboard() {
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('dashboard-section').classList.remove('hidden');
-            // Set today's date by default
             document.getElementById('mem-date').valueAsDate = new Date();
-            renderAdminList();
+            loadAdminMemories();
         }
 
-        function getMemories() {
-            const stored = localStorage.getItem('travel_memories');
-            return stored ? JSON.parse(stored) : [];
-        }
-
-        function handleAddMemory(e) {
-            e.preventDefault();
-            const title = document.getElementById('mem-title').value;
-            const location = document.getElementById('mem-location').value;
-            const type = document.getElementById('mem-type').value;
-            const url = document.getElementById('mem-url').value;
-            const date = document.getElementById('mem-date').value;
-            const description = document.getElementById('mem-desc').value;
-
-            const memories = getMemories();
-            const newMem = {
-                id: Date.now(),
-                title,
-                location,
-                type,
-                url,
-                date,
-                description
-            };
-
-            memories.push(newMem);
-            localStorage.setItem('travel_memories', JSON.stringify(memories));
-
-            alert('Memory added successfully! It is now live on your travel diary.');
-            e.target.reset();
-            document.getElementById('mem-date').valueAsDate = new Date();
-            renderAdminList();
-        }
-
-        function deleteMemory(id) {
-            if (confirm('Are you sure you want to delete this memory?')) {
-                let memories = getMemories();
-                memories = memories.filter(m => m.id !== id);
-                localStorage.setItem('travel_memories', JSON.stringify(memories));
-                renderAdminList();
-            }
-        }
-
-        function renderAdminList() {
-            const memories = getMemories();
+        async function loadAdminMemories() {
             const container = document.getElementById('admin-memories-list');
-            container.innerHTML = '';
+            const { data, error } = await supabaseClient
+                .from('memories')
+                .select('*')
+                .order('date', { ascending: false });
 
-            if (memories.length === 0) {
-                container.innerHTML = `<p class="text-gray-500 py-4 text-lg">No memories found.</p>`;
+            if (error) {
+                container.innerHTML = `<p class="text-red-600 text-lg">Error loading records.</p>`;
                 return;
             }
 
-            memories.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(mem => {
+            container.innerHTML = '';
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="text-gray-500 py-4 text-lg">No memories found in cloud.</p>`;
+                return;
+            }
+
+            data.forEach(mem => {
                 const item = document.createElement('div');
                 item.className = "pt-4 first:pt-0 flex flex-col md:flex-row justify-between items-start md:items-center gap-4";
                 item.innerHTML = `
@@ -236,7 +205,48 @@
             });
         }
 
-        // Check if already authenticated in this session
+        async function handleAddMemory(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            btn.innerText = 'Publishing...';
+            btn.disabled = true;
+
+            const newMem = {
+                title: document.getElementById('mem-title').value,
+                location: document.getElementById('mem-location').value,
+                type: document.getElementById('mem-type').value,
+                url: document.getElementById('mem-url').value,
+                date: document.getElementById('mem-date').value,
+                description: document.getElementById('mem-desc').value
+            };
+
+            const { error } = await supabaseClient.from('memories').insert([newMem]);
+
+            btn.innerText = 'Publish to Cloud';
+            btn.disabled = false;
+
+            if (error) {
+                alert('Error adding memory: ' + error.message);
+                return;
+            }
+
+            alert('Memory successfully published to Supabase! It is now live globally.');
+            e.target.reset();
+            document.getElementById('mem-date').valueAsDate = new Date();
+            loadAdminMemories();
+        }
+
+        async function deleteMemory(id) {
+            if (confirm('Are you sure you want to delete this memory from the cloud?')) {
+                const { error } = await supabaseClient.from('memories').delete().eq('id', id);
+                if (error) {
+                    alert('Error deleting: ' + error.message);
+                    return;
+                }
+                loadAdminMemories();
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('travel_auth') === 'true') {
                 showDashboard();
