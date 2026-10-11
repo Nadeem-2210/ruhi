@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nadeem & Sister's Travel Diary | Udaipur & Ahmedabad</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        royalBlue: '#1E3A8A',
+                        terracotta: '#9A3412',
+                        sand: '#FDFBF7',
+                        goldAccent: '#D97706'
+                    },
+                    fontFamily: {
+                        serif: ['Times New Roman', 'Georgia', 'serif'],
+                        sans: ['Times New Roman', 'Arial', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+        }
+    </style>
+</head>
+<body class="bg-sand text-gray-800 min-h-screen flex flex-col selection:bg-goldAccent selection:text-white">
+
+    <!-- Navigation Bar -->
+    <nav class="sticky top-0 z-50 bg-sand/90 backdrop-blur-md border-b border-amber-900/20 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <span class="text-2xl font-bold tracking-wider text-terracotta">N & S TRAVEL DIARY</span>
+        </div>
+        <div class="flex items-center space-x-6 text-lg">
+            <a href="#gallery" class="hover:text-terracotta transition-colors">Memories</a>
+            <a href="#cities" class="hover:text-terracotta transition-colors">Locations</a>
+            <a href="admin.html" class="bg-royalBlue text-white px-4 py-1.5 rounded text-base hover:bg-royalBlue/90 transition shadow-sm">Admin Portal</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section: Udaipur & Ahmedabad Vibe -->
+    <header class="relative bg-gradient-to-r from-royalBlue to-terracotta text-white py-24 px-6 text-center">
+        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <div class="relative max-w-4xl mx-auto space-y-6">
+            <span class="uppercase tracking-widest text-amber-200 text-sm font-semibold">A Chronicle of Roots & Horizons</span>
+            <h1 class="text-4xl md:text-6xl font-serif font-bold tracking-wide">Udaipur & Ahmedabad Journeys</h1>
+            <p class="text-xl md:text-2xl font-light max-w-2xl mx-auto text-amber-50/90">
+                Capturing the timeless heritage of the City of Lakes and the vibrant soul of the Manchester of the East.
+            </p>
+            <div class="pt-4 flex justify-center gap-4">
+                <a href="#gallery" class="bg-amber-100 text-terracotta font-semibold px-8 py-3 rounded shadow hover:bg-white transition">Explore Memories</a>
+                <a href="admin.html" class="border border-white/80 text-white px-8 py-3 rounded hover:bg-white/10 transition">Upload Media</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl mx-auto px-6 py-12 w-full space-y-16">
+
+        <!-- Filter Tabs by City -->
+        <section id="cities" class="space-y-6">
+            <div class="flex flex-col md:flex-row justify-between items-center border-b border-gray-300 pb-4">
+                <h2 class="text-3xl font-serif font-bold text-royalBlue">Explore by Location</h2>
+                <div class="flex flex-wrap gap-3 mt-4 md:mt-0" id="filter-buttons">
+                    <button onclick="filterLocation('all')" class="filter-btn px-5 py-2 rounded bg-royalBlue text-white text-lg transition shadow-sm">All Places</button>
+                    <button onclick="filterLocation('Udaipur')" class="filter-btn px-5 py-2 rounded bg-gray-200 text-gray-700 text-lg hover:bg-gray-300 transition">Udaipur</button>
+                    <button onclick="filterLocation('Ahmedabad')" class="filter-btn px-5 py-2 rounded bg-gray-200 text-gray-700 text-lg hover:bg-gray-300 transition">Ahmedabad</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Photo & Video Grid -->
+        <section id="gallery" class="space-y-6">
+            <div id="media-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Dynamically populated cards will appear here -->
+            </div>
+            
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden text-center py-20 bg-white rounded-lg border border-dashed border-gray-300">
+                <p class="text-xl text-gray-500 font-serif">No memories added yet for this filter.</p>
+                <a href="admin.html" class="inline-block mt-4 text-terracotta underline font-semibold">Go to Admin Panel to add memories</a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="fixed inset-0 z-50 bg-black/90 hidden flex items-center justify-center p-4">
+        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-3xl hover:text-amber-300">&times;</button>
+        <div id="lightbox-content" class="max-w-4xl max-h-[90vh] flex items-center justify-center">
+            <!-- Content injected via JS -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-royalBlue text-white py-10 px-6 border-t border-amber-900/30 text-center mt-16">
+        <div class="max-w-4xl mx-auto space-y-3">
+            <p class="text-xl font-serif">Nadeem & Sister's Travel Diary</p>
+            <p class="text-sm text-amber-200/80">Crafted with elegance for Udaipur & Ahmedabad adventures.</p>
+            <p class="text-xs text-gray-400 pt-4">&copy; 2026 Travel Diary. Deployed on Vercel.</p>
+        </div>
+    </footer>
+
+    <!-- Frontend Script for Dynamic Loading & Filtering -->
+    <script>
+        // Default seed data capturing Udaipur & Ahmedabad vibe if none exist in LocalStorage
+        const defaultMemories = [
+            {
+                id: 1,
+                title: "Sunset at Lake Pichola",
+                location: "Udaipur",
+                type: "image",
+                url: "https://images.unsplash.com/photo-1615836245347-f54b2fc1346a?auto=format&fit=crop&w=800&q=80",
+                description: "Golden hour reflection on the tranquil waters of Lake Pichola.",
+                date: "2026-03-15"
+            },
+            {
+                id: 2,
+                title: "Historic Pols of Ahmedabad",
+                location: "Ahmedabad",
+                type: "image",
+                url: "https://images.unsplash.com/photo-1599661046289-e31898f46a41?auto=format&fit=crop&w=800&q=80",
+                description: "Exploring the intricate wooden architecture and heritage lanes.",
+                date: "2026-04-10"
+            },
+            {
+                id: 3,
+                title: "Saheliyon-ki-Bari Fountains",
+                location: "Udaipur",
+                type: "image",
+                url: "https://images.unsplash.com/photo-1589182337358-2cb6a099450d?auto=format&fit=crop&w=800&q=80",
+                description: "Strolling through the lush green gardens and marble kiosks.",
+                date: "2026-05-02"
+            },
+            {
+                id: 4,
+                title: "Sabarmati Riverfront Evening",
+                location: "Ahmedabad",
+                type: "image",
+                url: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=800&q=80",
+                description: "Breezy walks along the vibrant riverfront promenade.",
+                date: "2026-05-20"
+            }
+        ];
+
+        function getMemories() {
+            const stored = localStorage.getItem('travel_memories');
+            if (!stored) {
+                localStorage.setItem('travel_memories', JSON.stringify(defaultMemories));
+                return defaultMemories;
+            }
+            return JSON.parse(stored);
+        }
+
+        let currentFilter = 'all';
+
+        function renderMemories(filter = 'all') {
+            const memories = getMemories();
+            const grid = document.getElementById('media-grid');
+            const emptyState = document.getElementById('empty-state');
+            
+            grid.innerHTML = '';
+            
+            const filtered = filter === 'all' 
+                ? memories 
+                : memories.filter(m => m.location.toLowerCase() === filter.toLowerCase());
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(mem => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition border border-amber-900/10 flex flex-col";
+                
+                let mediaElement = '';
+                if (mem.type === 'video' || mem.url.includes('youtube.com') || mem.url.includes('youtu.be') || mem.url.endsWith('.mp4')) {
+                    if (mem.url.includes('youtube.com') || mem.url.includes('youtu.be')) {
+                        // Handle simple YouTube embed or fallback
+                        mediaElement = `<div class="aspect-video w-full bg-black flex items-center justify-center text-white"><span class="text-sm">Video Memory</span></div>`;
+                    } else {
+                        mediaElement = `<video src="${mem.url}" class="w-full h-64 object-cover cursor-pointer" onclick="openVideoModal('${mem.url}')" controls></video>`;
+                    }
+                } else {
+                    mediaElement = `<img src="${mem.url}" alt="${mem.title}" class="w-full h-64 object-cover cursor-pointer hover:scale-105 transition duration-300" onclick="openImageModal('${mem.url}', '${mem.title}')">`;
+                }
+
+                card.innerHTML = `
+                    <div class="relative overflow-hidden">
+                        ${mediaElement}
+                        <span class="absolute top-3 left-3 bg-royalBlue text-white text-xs px-3 py-1 rounded-full uppercase tracking-wider">${mem.location}</span>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col justify-between space-y-3">
+                        <div>
+                            <div class="text-xs text-terracotta font-semibold mb-1">${mem.date}</div>
+                            <h3 class="text-2xl font-serif font-bold text-gray-900">${mem.title}</h3>
+                            <p class="text-gray-600 mt-2 text-base leading-relaxed">${mem.description}</p>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterLocation(location) {
+            currentFilter = location;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.textContent.toLowerCase().includes(location.toLowerCase()) || (location === 'all' && btn.textContent.includes('All'))) {
+                    btn.className = "filter-btn px-5 py-2 rounded bg-royalBlue text-white text-lg transition shadow-sm";
+                } else {
+                    btn.className = "filter-btn px-5 py-2 rounded bg-gray-200 text-gray-700 text-lg hover:bg-gray-300 transition";
+                }
+            });
+            renderMemories(location);
+        }
+
+        function openImageModal(url, title) {
+            const modal = document.getElementById('lightbox');
+            const content = document.getElementById('lightbox-content');
+            content.innerHTML = `<div class="text-center"><img src="${url}" class="max-h-[80vh] rounded shadow-2xl mx-auto"><p class="text-white mt-4 text-xl font-serif">${title}</p></div>`;
+            modal.classList.remove('hidden');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+        }
+
+        // Initial load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderMemories('all');
+        });
+    </script>
+</body>
+</html>
